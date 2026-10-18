@@ -1,0 +1,1321 @@
+<!doctype html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8" />
+		<meta
+			name="viewport"
+			content="width=device-width, initial-scale=1, viewport-fit=cover"
+		/>
+		<title>crush</title>
+		<link
+			href="https://fonts.googleapis.com/css2?family=Quicksand:wght@500;700&display=swap"
+			rel="stylesheet"
+		/>
+		<style>
+			:root {
+				--bg: #fff3f8;
+				--card: #fff;
+				--ink: #3d2a44;
+				--mute: #8d7794;
+				--pk: #e9709a;
+				--pk2: #ffe0ec;
+				--lv: #8f74e0;
+				--lv2: #eee8ff;
+				--ln: #f6d3e2;
+				box-sizing: border-box;
+				padding-top: env(safe-area-inset-top, 0px);
+				padding-bottom: env(safe-area-inset-bottom, 0px);
+			}
+			@media (prefers-color-scheme: dark) {
+				:root:not([data-theme="light"]) {
+					--bg: #1e1522;
+					--card: #2b2031;
+					--ink: #f7eaf2;
+					--mute: #bba7c2;
+					--pk: #f59ab9;
+					--pk2: #46293b;
+					--lv: #c9b7ff;
+					--lv2: #372c4f;
+					--ln: #45324c;
+					color-scheme: dark;
+				}
+			}
+			:root[data-theme="dark"] {
+				--bg: #1e1522;
+				--card: #2b2031;
+				--ink: #f7eaf2;
+				--mute: #bba7c2;
+				--pk: #f59ab9;
+				--pk2: #46293b;
+				--lv: #c9b7ff;
+				--lv2: #372c4f;
+				--ln: #45324c;
+				color-scheme: dark;
+			}
+			html {
+				scroll-padding-top: env(safe-area-inset-top, 0px);
+			}
+			* {
+				box-sizing: border-box;
+			}
+			body {
+				margin: 0;
+				background: var(--bg);
+				color: var(--ink);
+				font:
+					500 15px/1.45 Quicksand,
+					system-ui,
+					-apple-system,
+					"Segoe UI",
+					sans-serif;
+			}
+			main {
+				max-width: 560px;
+				margin: 0 auto;
+				padding: 16px 14px 100px;
+			}
+			h1 {
+				font-size: 24px;
+				margin: 4px 0 2px;
+			}
+			.mute,
+			small {
+				color: var(--mute);
+				font-size: 13px;
+			}
+			.b {
+				font-weight: 700;
+			}
+			.card {
+				background: var(--card);
+				border: 2px solid var(--ln);
+				border-radius: 22px;
+				padding: 14px;
+				margin: 12px 0;
+			}
+			.today {
+				border-color: var(--lv);
+				border-width: 3px;
+			}
+			.row {
+				display: flex;
+				align-items: center;
+				gap: 10px;
+				padding: 9px 0;
+				border-bottom: 2px dotted var(--ln);
+			}
+			.row:last-child {
+				border: 0;
+			}
+			.grow {
+				flex: 1;
+				min-width: 0;
+			}
+			.k {
+				white-space: nowrap;
+				font-weight: 700;
+				color: var(--pk);
+			}
+			input[type="checkbox"] {
+				appearance: none;
+				-webkit-appearance: none;
+				width: 26px;
+				height: 26px;
+				margin: 0;
+				border-radius: 10px;
+				border: 2px solid var(--pk);
+				background: var(--card);
+				flex: none;
+				display: grid;
+				place-content: center;
+				cursor: pointer;
+			}
+			input[type="checkbox"]:checked {
+				background: var(--pk);
+			}
+			input[type="checkbox"]:checked::after {
+				content: "✓";
+				color: #fff;
+				font-weight: 700;
+			}
+			.chips {
+				display: flex;
+				gap: 6px;
+				flex-wrap: wrap;
+			}
+			.chip {
+				border: 2px solid var(--ln);
+				background: var(--card);
+				color: var(--ink);
+				border-radius: 99px;
+				padding: 6px 12px;
+				font: inherit;
+				font-weight: 700;
+				font-size: 13px;
+				cursor: pointer;
+			}
+			.chip.on {
+				background: var(--pk);
+				border-color: var(--pk);
+				color: #fff;
+			}
+			.bar {
+				height: 14px;
+				border-radius: 9px;
+				background: var(--pk2);
+				overflow: hidden;
+			}
+			.bar i {
+				display: block;
+				height: 100%;
+				background: linear-gradient(90deg, var(--pk), var(--lv));
+			}
+			.pill {
+				background: var(--lv2);
+				border-radius: 16px;
+				padding: 9px 12px;
+				font-size: 13px;
+				margin-top: 10px;
+			}
+			.btn {
+				border: 0;
+				border-radius: 16px;
+				padding: 10px 16px;
+				background: var(--lv);
+				color: #fff;
+				font: inherit;
+				font-weight: 700;
+				cursor: pointer;
+			}
+			.big {
+				font-size: 36px;
+				font-weight: 700;
+				color: var(--lv);
+			}
+			input[type="number"],
+			select {
+				font: inherit;
+				padding: 9px 12px;
+				border-radius: 14px;
+				border: 2px solid var(--ln);
+				background: var(--card);
+				color: var(--ink);
+				width: 100%;
+			}
+			#nav {
+				position: fixed;
+				left: 0;
+				right: 0;
+				bottom: 0;
+				display: flex;
+				justify-content: space-around;
+				background: var(--card);
+				border-top: 2px solid var(--ln);
+				padding: 8px 8px calc(8px + env(safe-area-inset-bottom, 0px));
+			}
+			#nav button {
+				border: 0;
+				background: none;
+				color: var(--mute);
+				font: inherit;
+				font-weight: 700;
+				font-size: 12px;
+				display: grid;
+				justify-items: center;
+				padding: 4px 14px;
+				border-radius: 16px;
+				cursor: pointer;
+			}
+			#nav button span {
+				font-size: 21px;
+			}
+			#nav .on {
+				color: var(--pk);
+				background: var(--pk2);
+			}
+		</style>
+	</head>
+	<body>
+		<main id="app"></main>
+		<nav id="nav"></nav>
+		<script>
+			/**
+			 * Finds the first element matching a CSS selector.
+			 * @param {string} selector
+			 * @returns {Element|null}
+			 */
+			const findElement = (selector) => document.querySelector(selector),
+				/** Current date/time, captured once at page load. */
+				now = new Date(),
+				/** Local date as YYYY-MM-DD, used as the key for per-day data. */
+				todayKey = now.toLocaleDateString("en-CA"),
+				/** Day of the week, 0 = Sunday ... 6 = Saturday. */
+				weekday = now.getDay();
+			/** Tag names that must be created in the SVG namespace. */
+			const svgTags = new Set(["svg", "polyline", "circle"]);
+			/**
+			 * Builds a DOM element. Strings are added as text, never parsed as HTML.
+			 * @param {string} tag HTML or SVG tag name.
+			 * @param {Object<string, string|number|boolean|null|undefined>} [attrs] Attributes; `false`, `null` and `undefined` are skipped, `true` sets an empty attribute.
+			 * @param {...(Node|string|number|boolean|null|undefined|Array)} children Child nodes or text; arrays are flattened, `false` and `null` are skipped.
+			 * @returns {Element}
+			 */
+			const createElement = (tag, attrs = {}, ...children) => {
+				const el = svgTags.has(tag)
+					? document.createElementNS("http://www.w3.org/2000/svg", tag)
+					: document.createElement(tag);
+				for (const [name, value] of Object.entries(attrs)) {
+					if (value !== false && value != null)
+						el.setAttribute(name, value === true ? "" : value);
+				}
+				el.append(
+					...children.flat(Infinity).filter((c) => c != null && c !== false),
+				);
+				return el;
+			};
+			/**
+			 * Builds a pill-shaped toggle button.
+			 * @param {boolean} isOn Whether the chip is highlighted as selected.
+			 * @param {Object} attrs Extra attributes, usually a `data-*` action.
+			 * @param {string} label
+			 * @returns {HTMLButtonElement}
+			 */
+			const chipButton = (isOn, attrs, label) =>
+				createElement(
+					"button",
+					{ class: "chip" + (isOn ? " on" : ""), ...attrs },
+					label,
+				);
+			/**
+			 * Everything persisted to localStorage under the key "crush".
+			 * @typedef {Object} AppState
+			 * @property {Object<string, Object<string, boolean>>} m Ticked items per day: date key -> item id -> done.
+			 * @property {Object<string, boolean>} c Ticked workout sets, keyed "workout:group:set".
+			 * @property {{d: string, kg: number}[]} w Weigh-ins (date key and kg).
+			 * @property {"t"|"s"|"w"|"g"} tab Active tab.
+			 * @property {0|1} plan Kcal plan used on the Today tab (0 = ~1,590, 1 = ~1,700).
+			 * @property {0|1} [sv] Plan shown on the Snacks tab; falls back to `plan` when unset.
+			 * @property {0|1} [br] Selected bread in `breadOptions`.
+			 * @property {2|3} sets Sets per exercise pair.
+			 * @property {Object<string, number>} mix Custom mix amounts: snack key -> grams (slices for bread keys B0/B1).
+			 * @property {number} [cap] Max kcal for the custom mix; falls back to `flexDayKcal`.
+			 * @property {"x"|"a"|"b"} [wo] Workout picked on the Train tab; falls back to today's workout.
+			 */
+			/** @type {AppState} */
+			let state = {};
+			try {
+				state = JSON.parse(localStorage.getItem("crush") || "{}");
+			} catch (e) {}
+			state.m = state.m || {};
+			state.c = state.c || {};
+			state.w = state.w || [];
+			state.tab = state.tab || "t";
+			state.plan = state.plan || 0;
+			state.sets = state.sets || 2;
+			state.mix = state.mix || {};
+			/** Writes `state` to localStorage; ignores failures (e.g. private mode). */
+			const saveState = () => {
+				try {
+					localStorage.setItem("crush", JSON.stringify(state));
+				} catch (e) {}
+			};
+			/**
+			 * Snack key -> [name, kcal per 100g, 1 if the kcal value is an estimate].
+			 * @type {Object<string, [string, number, number?]>}
+			 */
+			const snackCatalog = {
+				bread: ["Bread", 0],
+				pret: ["Chocolate pretzels", 461],
+				chick: ["BBQ chickpeas", 415],
+				corn: ["Sweet chilli corn", 430, 1],
+				alm: ["Chocolate almonds", 590, 1],
+				spek: ["Spekulatius spread", 611],
+				pab: ["Pumpkin almond butter", 638],
+				jam: ["Apricot jam", 250, 1],
+				fava: ["Jalapeño fava beans", 420, 1],
+				bp: ["Bean & pea mix", 420, 1],
+			};
+			/** Bread choices as [name, kcal per slice]. */
+			const breadOptions = [
+					["Better-for-you bread", 59],
+					["Chia bread", 110],
+				],
+				/** @returns {number} Kcal per slice of the selected bread. */
+				breadKcalPerSlice = () => breadOptions[state.br || 0][1],
+				/**
+				 * @param {string} k Snack key.
+				 * @param {number} g Grams, or slices when `k` is "bread".
+				 * @returns {number} Kcal for that amount.
+				 */
+				ingredientKcal = (k, g) =>
+					k == "bread"
+						? breadKcalPerSlice() * g
+						: (snackCatalog[k][1] * g) / 100;
+			/**
+			 * @param {[string, number][]} a Pairs of [snack key, amount].
+			 * @returns {number} Total kcal, rounded per item.
+			 */
+			const totalKcal = (a) =>
+				a.reduce((s, [k, g]) => s + Math.round(ingredientKcal(k, g)), 0);
+			/**
+			 * @param {[string, number][]} a Pairs of [snack key, amount].
+			 * @returns {string} Readable text such as "1 slice chia bread + 15g spekulatius spread".
+			 */
+			const describeIngredients = (a) =>
+				a
+					.map(([k, g]) =>
+						k == "bread"
+							? g +
+								" slice" +
+								(g > 1 ? "s" : "") +
+								" " +
+								breadOptions[state.br || 0][0].toLowerCase()
+							: g + "g " + snackCatalog[k][0].toLowerCase(),
+					)
+					.join(" + ");
+			/**
+			 * Daily snack plates for each kcal plan (index 0 = ~1,590, 1 = ~1,700).
+			 * Each plan maps weekday (0 = Sunday) -> [plate name, [snack key, amount][]].
+			 * @type {Object<number, [string, [string, number][]]>[]}
+			 */
+			const snackPlans = [
+				{
+					1: [
+						"Spekulatius & almond butter toast",
+						[
+							["bread", 1],
+							["spek", 15],
+							["pab", 12],
+						],
+					],
+					2: [
+						"Sweet-salty trail mix",
+						[
+							["pret", 15],
+							["alm", 10],
+							["corn", 25],
+						],
+					],
+					3: [
+						"PB&J toast: almond butter & apricot",
+						[
+							["bread", 1],
+							["pab", 15],
+							["jam", 25],
+						],
+					],
+					4: [
+						"Savoury crunch mix",
+						[
+							["chick", 25],
+							["fava", 15],
+							["bp", 15],
+						],
+					],
+					5: [
+						"Spekulatius pretzel dippers",
+						[
+							["pret", 30],
+							["spek", 15],
+						],
+					],
+					6: [
+						"Sweet-heat mix",
+						[
+							["corn", 30],
+							["fava", 15],
+							["alm", 6],
+						],
+					],
+					0: ["Flex day", []],
+				},
+				{
+					1: [
+						"Spekulatius & almond butter toast",
+						[
+							["bread", 1],
+							["spek", 15],
+							["pab", 15],
+							["pret", 20],
+						],
+					],
+					2: [
+						"Sweet-salty trail mix",
+						[
+							["pret", 20],
+							["alm", 15],
+							["corn", 35],
+						],
+					],
+					3: [
+						"PB&J toast: almond butter & apricot",
+						[
+							["bread", 2],
+							["pab", 20],
+							["jam", 35],
+						],
+					],
+					4: [
+						"Savoury crunch mix",
+						[
+							["chick", 35],
+							["fava", 20],
+							["bp", 25],
+						],
+					],
+					5: [
+						"Spekulatius pretzel dippers",
+						[
+							["pret", 40],
+							["spek", 25],
+						],
+					],
+					6: [
+						"Sweet-heat mix",
+						[
+							["corn", 45],
+							["fava", 20],
+							["alm", 10],
+						],
+					],
+					0: ["Flex day", []],
+				},
+			];
+			/** Snack kcal budget on flex days, per plan; also the default cap for the custom mix. */
+			const flexDayKcal = [230, 340];
+			/**
+			 * Fixed meals as [id, emoji, title, description, kcal].
+			 * @type {[string, string, string, string, number][]}
+			 */
+			const dailyMeals = [
+				["b", "🍳", "Breakfast", "Your usual egg breakfast · 44g protein", 423],
+				[
+					"c",
+					"☕",
+					"Morning coffee",
+					"250 ml Alpro High Protein · ~12g protein",
+					143,
+				],
+				[
+					"l",
+					"🌮",
+					"Lunch: chipotle tofu bowl",
+					"150g firm tofu, 100g cooked rice, 80g black beans, 60g pico, 30g sweetcorn, 80g salad, 20g Fage 0%",
+					460,
+				],
+				[
+					"d",
+					"🌯",
+					"Dinner: turkey wrap",
+					"1 wholemeal wrap (~60g), 80g turkey shavings, 2 light cheese triangles, 100g salad veg",
+					335,
+				],
+			];
+			/**
+			 * Workout id -> [title, subtitle, groups]. A group is [name, [exercise, reps][], rounds?];
+			 * groups without `rounds` use `state.sets`.
+			 * @type {Object<string, [string, string, [string, [string, string][], number?][]]>}
+			 */
+			const workouts = {
+				x: [
+					"Monday Express",
+					"15-20 min, light: stop with ~2 reps left",
+					[
+						[
+							"Circuit",
+							[
+								["Goblet squat", "10"],
+								["Bent-over row", "10"],
+								["Glute bridge", "15"],
+								["Dead bug", "8 / side"],
+							],
+							2,
+						],
+					],
+				],
+				a: [
+					"Workout A: glute + upper body",
+					"Tuesday, about 30-40 min",
+					[
+						[
+							"Pair 1",
+							[
+								["Glute bridge (band above knees)", "15"],
+								["Bent-over dumbbell row", "10-12"],
+							],
+						],
+						[
+							"Pair 2",
+							[
+								["Goblet squat", "10-12"],
+								["Dumbbell floor press", "10"],
+							],
+						],
+						[
+							"Pair 3",
+							[
+								["Banded standing kickback", "12-15 / leg"],
+								["Dead bug", "10-12"],
+							],
+						],
+					],
+				],
+				b: [
+					"Workout B: glute + lower body",
+					"Thursday, about 30-40 min",
+					[
+						[
+							"Pair 1",
+							[
+								["Hip thrust (dumbbell, band optional)", "12-15"],
+								["Dumbbell shoulder press", "10"],
+							],
+						],
+						[
+							"Pair 2",
+							[
+								["Dumbbell deadlift", "10-12"],
+								["Hammer curl", "10-12"],
+							],
+						],
+						[
+							"Pair 3",
+							[
+								["Banded lateral walks", "15 steps / side"],
+								["Russian twists", "20 total"],
+							],
+						],
+					],
+				],
+			};
+
+			/**
+			 * Today tab: meals, the day's snack plate, walking and workout checklist, kcal progress.
+			 * @returns {Node[]}
+			 */
+			function renderTodayView() {
+				const [pn, pi] = snackPlans[state.plan][weekday],
+					sk = pi.length ? totalKcal(pi) : flexDayKcal[state.plan],
+					rows = [
+						...dailyMeals,
+						[
+							"s",
+							"🍫",
+							"Snack: " + pn,
+							pi.length
+								? describeIngredients(pi)
+								: "Any two packs from the week, up to ~" +
+									flexDayKcal[state.plan] +
+									" kcal",
+							sk,
+						],
+					],
+					d = state.m[todayKey] || {},
+					T = rows.reduce((a, r) => a + r[4], 0),
+					E = rows.reduce((a, r) => a + (d[r[0]] ? r[4] : 0), 0),
+					wk = {
+						1: "Express weights",
+						2: "Workout A",
+						3: "Pilates",
+						4: "Workout B",
+					}[weekday];
+				/**
+				 * One checkbox row for today's checklist.
+				 * @param {string} id Key in `state.m[todayKey]`.
+				 * @param {string} emoji
+				 * @param {string} title
+				 * @param {string} detail
+				 * @param {number} [kcal] Shown on the right when provided.
+				 * @returns {HTMLLabelElement}
+				 */
+				const checklistRow = (id, emoji, title, detail, kcal) =>
+					createElement(
+						"label",
+						{ class: "row" },
+						createElement("input", {
+							type: "checkbox",
+							"data-m": id,
+							checked: !!d[id],
+						}),
+						createElement("span", { style: "font-size:22px" }, emoji),
+						createElement(
+							"span",
+							{ class: "grow" },
+							createElement("span", { class: "b" }, title),
+							createElement("br"),
+							createElement("small", {}, detail),
+						),
+						kcal != null && createElement("span", { class: "k" }, kcal),
+					);
+				return [
+					createElement("h1", {}, "🌸 Today"),
+					createElement(
+						"div",
+						{ class: "mute" },
+						now.toLocaleDateString("en-IE", {
+							weekday: "long",
+							day: "numeric",
+							month: "long",
+						}),
+					),
+					createElement(
+						"div",
+						{ class: "card" },
+						createElement(
+							"div",
+							{ class: "chips" },
+							chipButton(!state.plan, { "data-plan": 0 }, "Plan ~1,590"),
+							chipButton(!!state.plan, { "data-plan": 1 }, "Plan ~1,700"),
+						),
+						createElement(
+							"p",
+							{ class: "b", style: "margin:12px 0 6px" },
+							`${E} / ${T} kcal `,
+							createElement(
+								"small",
+								{},
+								`· ${1955 - T} under maintenance (1,955)`,
+							),
+						),
+						createElement(
+							"div",
+							{ class: "bar" },
+							createElement("i", {
+								style: `width:${Math.min(100, (E / T) * 100)}%`,
+							}),
+						),
+					),
+					createElement(
+						"div",
+						{ class: "card" },
+						rows.map((r) => checklistRow(...r)),
+					),
+					createElement(
+						"div",
+						{ class: "card" },
+						checklistRow("w", "🚶", "Walking pad", "20-30 min while you work"),
+						wk &&
+							checklistRow(
+								"x",
+								"💪",
+								wk,
+								"After work. A short version still counts!",
+							),
+					),
+				];
+			}
+
+			/**
+			 * Snacks tab: plan and bread pickers, the week's plates, prep totals and the mixer.
+			 * @returns {Node[]}
+			 */
+			function renderSnacksView() {
+				const vi = state.sv == null ? state.plan : state.sv,
+					Q = snackPlans[vi],
+					o = [1, 2, 3, 4, 5, 6, 0],
+					nm = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"],
+					tot = {};
+				o.forEach((d) =>
+					Q[d][1].forEach(([k, g]) => (tot[k] = (tot[k] || 0) + g)),
+				);
+				return [
+					createElement("h1", {}, "🍫 Snack plates"),
+					createElement(
+						"div",
+						{ class: "mute" },
+						"One planned plate a day. Weigh it, plate it, put the bags away.",
+					),
+					createElement(
+						"div",
+						{ class: "chips", style: "margin:10px 0 4px" },
+						chipButton(!vi, { "data-sv": 0 }, "~1,590 kcal plan"),
+						chipButton(!!vi, { "data-sv": 1 }, "~1,700 kcal plan"),
+					),
+					createElement(
+						"small",
+						{},
+						`Whole day, coffee included, comes to about ${vi ? "1,700" : "1,590"} kcal. The Today tab uses the plan you pick there.`,
+					),
+					createElement(
+						"div",
+						{ class: "chips", style: "margin:8px 0" },
+						chipButton(
+							!state.br,
+							{ "data-br": 0 },
+							"Better-for-you bread: 59/slice",
+						),
+						chipButton(!!state.br, { "data-br": 1 }, "Chia bread: 110/slice"),
+					),
+					o.map((d) =>
+						createElement(
+							"div",
+							{ class: "card" + (d == weekday ? " today" : "") },
+							createElement(
+								"div",
+								{ class: "row", style: "border:0;padding:0" },
+								createElement(
+									"span",
+									{ class: "grow" },
+									createElement("span", { class: "b" }, `${nm[d]}: ${Q[d][0]}`),
+									createElement("br"),
+									createElement(
+										"small",
+										{},
+										Q[d][1].length
+											? describeIngredients(Q[d][1])
+											: "Any two leftover packs, up to ~" +
+													flexDayKcal[vi] +
+													" kcal",
+									),
+								),
+								createElement(
+									"span",
+									{ class: "k" },
+									`~${Q[d][1].length ? totalKcal(Q[d][1]) : flexDayKcal[vi]}`,
+								),
+							),
+						),
+					),
+					createElement(
+						"div",
+						{ class: "card" },
+						createElement(
+							"div",
+							{ class: "b" },
+							"🧺 Sunday prep: grams for the week",
+						),
+						createElement(
+							"div",
+							{ class: "chips", style: "margin-top:8px" },
+							Object.entries(tot).map(([k, g]) =>
+								createElement(
+									"span",
+									{ class: "chip" },
+									k == "bread"
+										? "Bread " + g + " slices"
+										: snackCatalog[k][0] + " " + g + "g",
+								),
+							),
+						),
+					),
+					renderMixer(),
+				];
+			}
+
+			/**
+			 * Looks up a mixer snack, including the two bread options (keys "B0" and "B1").
+			 * @param {string} k Snack key.
+			 * @returns {{n: string, u: number, s?: 1, e?: number}} Name, kcal per gram (per slice when `s`), slice-based flag, estimate flag.
+			 */
+			const getSnackInfo = (k) =>
+				k[0] == "B"
+					? { n: breadOptions[+k[1]][0], u: breadOptions[+k[1]][1], s: 1 }
+					: {
+							n: snackCatalog[k][0],
+							u: snackCatalog[k][1] / 100,
+							e: snackCatalog[k][2],
+						};
+			/** Snack keys offered in the custom mixer, in display order. */
+			const mixSnackKeys = [
+				"pret",
+				"chick",
+				"corn",
+				"alm",
+				"spek",
+				"pab",
+				"jam",
+				"fava",
+				"bp",
+				"B0",
+				"B1",
+			];
+			/** @returns {number} Max kcal allowed for the custom mix. */
+			const getMixKcalCap = () =>
+				state.cap || flexDayKcal[state.sv == null ? state.plan : state.sv];
+			/** @returns {number} Total kcal of the current custom mix. */
+			const getMixTotalKcal = () =>
+				Object.entries(state.mix).reduce(
+					(a, [k, v]) => a + getSnackInfo(k).u * v,
+					0,
+				);
+			/**
+			 * Custom mix card: kcal cap, snack chips and amount inputs.
+			 * Totals are filled in afterwards by `updateMixerTotals`.
+			 * @returns {HTMLDivElement}
+			 */
+			function renderMixer() {
+				const c = getMixKcalCap();
+				return createElement(
+					"div",
+					{ class: "card" },
+					createElement("div", { class: "b" }, "🧁 Make your own mix"),
+					createElement(
+						"small",
+						{},
+						"Tap snacks to add them, set the amounts, and stay under your max. (est.) means my estimate, so check your label.",
+					),
+					createElement(
+						"div",
+						{ class: "chips", style: "margin:10px 0" },
+						chipButton(c == 230, { "data-cap": 230 }, "Max 230 kcal"),
+						chipButton(c == 340, { "data-cap": 340 }, "Max 340 kcal"),
+					),
+					createElement(
+						"div",
+						{ class: "chips" },
+						mixSnackKeys.map((k) => {
+							const i = getSnackInfo(k);
+							return chipButton(
+								k in state.mix,
+								{ "data-add": k },
+								i.n + (i.s ? ": " + i.u + "/slice" : ""),
+							);
+						}),
+					),
+					Object.keys(state.mix).map((k) => {
+						const i = getSnackInfo(k);
+						return createElement(
+							"div",
+							{ class: "row" },
+							createElement(
+								"span",
+								{ class: "grow" },
+								createElement("span", { class: "b" }, i.n),
+								i.e && [" ", createElement("small", {}, "(est.)")],
+								createElement("br"),
+								createElement("small", { id: "mx-" + k }),
+							),
+							createElement("input", {
+								type: "number",
+								min: 0,
+								step: i.s ? 1 : 5,
+								inputmode: "decimal",
+								"data-mx": k,
+								value: state.mix[k],
+								style: "width:84px",
+							}),
+							createElement("span", {}, i.s ? "slices" : "g"),
+							createElement("span", { class: "k", id: "mk-" + k }),
+						);
+					}),
+					createElement(
+						"div",
+						{ style: "margin-top:12px" },
+						createElement("p", {
+							class: "b",
+							style: "margin:0 0 6px",
+							id: "mt",
+						}),
+						createElement(
+							"div",
+							{ class: "bar" },
+							createElement("i", { id: "mb" }),
+						),
+					),
+					createElement(
+						"button",
+						{ class: "chip", style: "margin-top:10px", "data-clr": 1 },
+						"Clear mix",
+					),
+				);
+			}
+			/**
+			 * Updates the mixer's per-snack kcal, "fits" hints, total text and progress bar
+			 * in place, so typing in an input does not rebuild it. Needs the Snacks tab to be rendered.
+			 */
+			function updateMixerTotals() {
+				const c = getMixKcalCap(),
+					t = getMixTotalKcal(),
+					r = Math.round(t);
+				for (const k in state.mix) {
+					const i = getSnackInfo(k),
+						own = i.u * state.mix[k],
+						mx = Math.max(0, Math.floor((c - (t - own)) / i.u)),
+						a = findElement("#mk-" + k),
+						b = findElement("#mx-" + k);
+					if (a) a.textContent = Math.round(own) + " kcal";
+					if (b)
+						b.textContent = "up to " + mx + (i.s ? " slices" : "g") + " fits";
+				}
+				findElement("#mt").textContent =
+					t == 0
+						? "Pick a few snacks to start. Max " + c + " kcal"
+						: r +
+							" / " +
+							c +
+							" kcal" +
+							(r > c ? " · over by " + (r - c) : " · " + (c - r) + " left");
+				const b = findElement("#mb");
+				b.style.width = Math.min(100, (t / c) * 100) + "%";
+				b.style.background = r > c ? "#e0566f" : "";
+			}
+			/**
+			 * Train tab: week overview, workout picker, warm-up, rest timer and set checkboxes.
+			 * @returns {Node[]}
+			 */
+			function renderTrainView() {
+				const k = state.wo || { 1: "x", 2: "a", 4: "b" }[weekday] || "a",
+					[n, t, G] = workouts[k],
+					wkd = [
+						["Mon", "💪 Express"],
+						["Tue", "💪 A"],
+						["Wed", "🧘 Pilates"],
+						["Thu", "💪 B"],
+						["Fri", "🚶 Walk"],
+						["Sat", "🧹 Clean"],
+						["Sun", "🛋️ Rest"],
+					],
+					ti = (weekday + 6) % 7;
+				return [
+					createElement("h1", {}, "💪 Train"),
+					createElement(
+						"div",
+						{ class: "chips", style: "margin:8px 0" },
+						wkd.map((x, i) =>
+							createElement(
+								"span",
+								{
+									class: "chip",
+									style:
+										"font-size:12px" +
+										(i == ti ? ";border-color:var(--lv)" : ""),
+								},
+								x[0] + " " + x[1],
+							),
+						),
+					),
+					createElement(
+						"div",
+						{ class: "card" },
+						createElement(
+							"div",
+							{ class: "chips" },
+							chipButton(k == "x", { "data-wo": "x" }, "Mon Express"),
+							chipButton(k == "a", { "data-wo": "a" }, "Tue A"),
+							chipButton(k == "b", { "data-wo": "b" }, "Thu B"),
+						),
+						createElement("p", { class: "b", style: "margin:12px 0 2px" }, n),
+						createElement("small", {}, t),
+						createElement(
+							"div",
+							{ class: "chips", style: "margin-top:10px" },
+							chipButton(
+								state.sets == 2,
+								{ "data-sets": 2 },
+								"Weeks 1-2: 2 sets",
+							),
+							chipButton(
+								state.sets == 3,
+								{ "data-sets": 3 },
+								"Weeks 3-4: 3 sets",
+							),
+						),
+						createElement(
+							"div",
+							{ class: "pill" },
+							"🔥 Warm-up, 5 min: 3 min easy on the walking pad, 10 bodyweight glute bridges, 8 slow squats. Only one dumbbell? Do both sides back to back, then rest.",
+						),
+					),
+					createElement(
+						"div",
+						{ class: "card", style: "text-align:center" },
+						createElement("div", { class: "big", id: "tm" }, "Rest timer"),
+						createElement(
+							"div",
+							{
+								class: "chips",
+								style: "justify-content:center;margin-top:8px",
+							},
+							[45, 60, 90].map((s) =>
+								createElement(
+									"button",
+									{ class: "chip", "data-tm": s },
+									s + "s",
+								),
+							),
+						),
+					),
+					G.map((g, i) => {
+						const s = g[2] || state.sets;
+						return createElement(
+							"div",
+							{ class: "card" },
+							createElement("div", { class: "b" }, g[0]),
+							g[1].map((e, j) =>
+								createElement(
+									"div",
+									{ class: "row" },
+									createElement(
+										"span",
+										{ class: "b", style: "color:var(--lv)" },
+										g[2] ? j + 1 : "AB"[j],
+									),
+									createElement("span", { class: "grow" }, e[0]),
+									createElement("span", { class: "k" }, e[1]),
+								),
+							),
+							createElement(
+								"div",
+								{ class: "chips", style: "margin-top:8px" },
+								Array.from({ length: s }, (_, q) => {
+									const id = k + ":" + i + ":" + q;
+									return createElement(
+										"label",
+										{
+											class: "chip",
+											style: "display:flex;gap:6px;align-items:center",
+										},
+										createElement("input", {
+											type: "checkbox",
+											"data-c": id,
+											checked: !!state.c[id],
+										}),
+										`${g[2] ? "Round" : "Set"} ${q + 1}`,
+									);
+								}),
+							),
+							createElement(
+								"small",
+								{},
+								`Rest 45-60s after each ${g[2] ? "round" : "pair"}`,
+							),
+						);
+					}),
+					createElement(
+						"button",
+						{ class: "btn", "data-rs": k },
+						"↺ Reset ticks",
+					),
+				];
+			}
+
+			/**
+			 * Line chart of up to the last 12 weigh-ins.
+			 * @param {{d: string, kg: number}[]} a Weigh-ins sorted by date.
+			 * @returns {SVGSVGElement|null} `null` when there are fewer than 2 entries.
+			 */
+			function renderWeightChart(a) {
+				a = a.slice(-12);
+				if (a.length < 2) return null;
+				const v = a.map((x) => x.kg),
+					lo = Math.min(...v) - 0.3,
+					hi = Math.max(...v) + 0.3,
+					p = a.map((x, i) => [
+						8 + (i * 284) / (a.length - 1),
+						8 + ((hi - x.kg) / (hi - lo)) * 84,
+					]);
+				return createElement(
+					"svg",
+					{ viewBox: "0 0 300 100", width: "100%", style: "margin-top:10px" },
+					createElement("polyline", {
+						fill: "none",
+						stroke: "var(--pk)",
+						"stroke-width": 3,
+						"stroke-linejoin": "round",
+						points: p.map((q) => q.join(",")).join(" "),
+					}),
+					p.map((q) =>
+						createElement("circle", {
+							cx: q[0],
+							cy: q[1],
+							r: 4,
+							fill: "var(--lv)",
+						}),
+					),
+				);
+			}
+
+			/**
+			 * Weigh-in tab: entry form, stats, chart, recent entries and check-in rules.
+			 * @returns {Node[]}
+			 */
+			function renderWeighInView() {
+				const a = [...state.w].sort((x, y) => (x.d < y.d ? -1 : 1)),
+					l = a.slice(-3),
+					av = l.length
+						? (l.reduce((s, x) => s + x.kg, 0) / l.length).toFixed(1)
+						: "–",
+					ch = a.length > 1 ? (a[a.length - 1].kg - a[0].kg).toFixed(1) : "–";
+				return [
+					createElement("h1", {}, "⚖️ Weigh-in"),
+					createElement(
+						"div",
+						{ class: "mute" },
+						"Saturday mornings, same conditions each time. Judge the 2-3 week trend, not one reading.",
+					),
+					createElement(
+						"div",
+						{ class: "card" },
+						createElement(
+							"div",
+							{ style: "display:flex;gap:8px" },
+							createElement("input", {
+								id: "wk",
+								type: "number",
+								step: 0.1,
+								inputmode: "decimal",
+								placeholder: "kg today",
+							}),
+							createElement("button", { class: "btn", id: "add" }, "Add"),
+						),
+						createElement(
+							"div",
+							{ class: "chips", style: "margin-top:10px" },
+							createElement(
+								"span",
+								{ class: "chip" },
+								`Latest ${a.length ? a[a.length - 1].kg : "–"} kg`,
+							),
+							createElement("span", { class: "chip" }, "Avg last 3: " + av),
+							createElement("span", { class: "chip" }, "Change: " + ch),
+						),
+						renderWeightChart(a),
+					),
+					createElement(
+						"div",
+						{ class: "card" },
+						a.length
+							? a
+									.slice(-8)
+									.reverse()
+									.map((x) =>
+										createElement(
+											"div",
+											{ class: "row" },
+											createElement("span", { class: "grow" }, x.d),
+											createElement("span", { class: "b" }, x.kg + " kg"),
+											createElement(
+												"button",
+												{ class: "chip", "data-del": x.d },
+												"✕",
+											),
+										),
+									)
+							: createElement(
+									"small",
+									{},
+									"No entries yet. Add your first weigh-in above.",
+								),
+					),
+					createElement(
+						"div",
+						{ class: "card" },
+						createElement("div", { class: "b" }, "🌷 Check-in rules"),
+						createElement(
+							"div",
+							{ class: "pill" },
+							"Flat for about 3 weeks? Trim ~100 kcal from the snack plate, no more. Missed a workout? Walk instead, and never skip twice in a row. Went over on a snack? The next meal is just your normal plan.",
+						),
+					),
+				];
+			}
+
+			/** Tab id -> function that returns that tab's nodes. */
+			const tabViews = {
+					t: renderTodayView,
+					s: renderSnacksView,
+					w: renderTrainView,
+					g: renderWeighInView,
+				},
+				navTabs = [
+					["t", "🌸", "Today"],
+					["s", "🍫", "Snacks"],
+					["w", "💪", "Train"],
+					["g", "⚖️", "Weigh-in"],
+				];
+			/** @type {number|undefined} Interval id of the running rest timer. */
+			let restTimerId;
+			/** Re-renders the active tab and the bottom nav. */
+			function renderApp() {
+				findElement("#app").replaceChildren(...tabViews[state.tab]().flat());
+				if (state.tab == "s") updateMixerTotals();
+				findElement("#nav").replaceChildren(
+					...navTabs.map((n) =>
+						createElement(
+							"button",
+							{ "data-tab": n[0], class: state.tab == n[0] && "on" },
+							createElement("span", {}, n[1]),
+							n[2],
+						),
+					),
+				);
+			}
+			// Handles every button via its data-* attribute, then saves and re-renders.
+			document.addEventListener("click", (e) => {
+				const t = e.target.closest("button");
+				if (!t) return;
+				const d = t.dataset;
+				if (d.tab) {
+					state.tab = d.tab;
+					window.scrollTo(0, 0);
+				} else if (d.plan != null) state.plan = +d.plan;
+				else if (d.cap) state.cap = +d.cap;
+				else if (d.add) {
+					if (d.add in state.mix) delete state.mix[d.add];
+					else
+						state.mix[d.add] =
+							d.add[0] == "B"
+								? 1
+								: d.add == "spek" || d.add == "pab" || d.add == "jam"
+									? 10
+									: 15;
+				} else if (d.clr) state.mix = {};
+				else if (d.br != null) state.br = +d.br;
+				else if (d.sv != null) state.sv = +d.sv;
+				else if (d.wo) state.wo = d.wo;
+				else if (d.sets) state.sets = +d.sets;
+				else if (d.tm) {
+					clearInterval(restTimerId);
+					let n = +d.tm;
+					const f = () => {
+						const el = findElement("#tm");
+						if (el) el.textContent = n > 0 ? n + "s" : "Go! 💪";
+						if (n-- <= 0) {
+							clearInterval(restTimerId);
+							try {
+								navigator.vibrate && navigator.vibrate(300);
+							} catch (x) {}
+						}
+					};
+					f();
+					restTimerId = setInterval(f, 1000);
+					return;
+				} else if (d.rs) {
+					Object.keys(state.c).forEach((k) => {
+						if (k.startsWith(d.rs + ":")) delete state.c[k];
+					});
+				} else if (d.del) state.w = state.w.filter((x) => x.d != d.del);
+				else if (t.id == "add") {
+					const v = parseFloat(findElement("#wk").value);
+					if (!(v > 20 && v < 300)) return;
+					state.w = state.w.filter((x) => x.d != todayKey);
+					state.w.push({ d: todayKey, kg: Math.round(v * 10) / 10 });
+				} else return;
+				saveState();
+				renderApp();
+			});
+			// Checkboxes: data-m is a day checklist item, data-c is a workout set.
+			document.addEventListener("change", (e) => {
+				const d = e.target.dataset;
+				if (d.m) {
+					(state.m[todayKey] = state.m[todayKey] || {})[d.m] = e.target.checked;
+					saveState();
+					renderApp();
+				} else if (d.c) {
+					state.c[d.c] = e.target.checked;
+					saveState();
+				}
+			});
+			// Mixer amount inputs: update totals in place so the input keeps focus.
+			document.addEventListener("input", (e) => {
+				const k = e.target.dataset.mx;
+				if (k) {
+					state.mix[k] = Math.max(0, parseFloat(e.target.value) || 0);
+					saveState();
+					updateMixerTotals();
+				}
+			});
+			renderApp();
+		</script>
+	</body>
+</html>
