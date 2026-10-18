@@ -290,6 +290,7 @@
 			 * Everything persisted to localStorage under the key "crush".
 			 * @typedef {Object} AppState
 			 * @property {Object<string, Object<string, boolean>>} m Ticked items per day: date key -> item id -> done.
+			 * @property {Object<string, Object<string, number>>} kcal Kcal typed in for `editableMealIds`: date key -> meal id -> kcal. Unset meals use the default in `dailyMeals`.
 			 * @property {Object<string, boolean>} c Ticked workout sets, keyed "workout:group:set".
 			 * @property {{d: string, kg: number}[]} w Weigh-ins (date key and kg).
 			 * @property {"t"|"s"|"w"|"g"} tab Active tab.
@@ -307,6 +308,7 @@
 				state = JSON.parse(localStorage.getItem("crush") || "{}");
 			} catch (e) {}
 			state.m = state.m || {};
+			state.kcal = state.kcal || {};
 			state.c = state.c || {};
 			state.w = state.w || [];
 			state.tab = state.tab || "t";
@@ -483,8 +485,10 @@
 			];
 			/** Snack kcal budget on flex days, per plan; also the default cap for the custom mix. */
 			const flexDayKcal = [230, 340];
+			/** Daily kcal goal for each plan (index 0 = data-plan 0, 1 = data-plan 1). */
+			const planGoalKcal = [1590, 1700];
 			/**
-			 * Fixed meals as [id, emoji, title, description, kcal].
+			 * Daily meals as [id, emoji, title, description, default kcal].
 			 * @type {[string, string, string, string, number][]}
 			 */
 			const dailyMeals = [
@@ -499,18 +503,20 @@
 				[
 					"l",
 					"🌮",
-					"Lunch: chipotle tofu bowl",
-					"150g firm tofu, 100g cooked rice, 80g black beans, 60g pico, 30g sweetcorn, 80g salad, 20g Fage 0%",
+					"Lunch",
+					"Low carb, high protein and fibre to continue with your day.",
 					460,
 				],
 				[
 					"d",
 					"🌯",
-					"Dinner: turkey wrap",
-					"1 wholemeal wrap (~60g), 80g turkey shavings, 2 light cheese triangles, 100g salad veg",
+					"Dinner",
+					"Something lighter, efortless.",
 					335,
 				],
 			];
+			/** Meals whose kcal the user types in each day. */
+			const editableMealIds = new Set(["b", "l", "d"]);
 			/**
 			 * Workout id -> [title, subtitle, groups]. A group is [name, [exercise, reps][], rounds?];
 			 * groups without `rounds` use `state.sets`.
@@ -590,29 +596,58 @@
 			};
 
 			/**
+			 * Today's meals and snack as [id, emoji, title, description, kcal],
+			 * using the kcal typed in for a meal when there is one.
+			 * @returns {[string, string, string, string, number][]}
+			 */
+			function getTodayRows() {
+				const [name, items] = snackPlans[state.plan][weekday],
+					typed = state.kcal[todayKey] || {};
+				return [
+					...dailyMeals.map(([id, emoji, title, detail, kcal]) => [
+						id,
+						emoji,
+						title,
+						detail,
+						typed[id] ?? kcal,
+					]),
+					[
+						"s",
+						"🍫",
+						"Snack: " + name,
+						items.length
+							? describeIngredients(items)
+							: "Any two packs from the week, up to ~" +
+								flexDayKcal[state.plan] +
+								" kcal",
+						items.length ? totalKcal(items) : flexDayKcal[state.plan],
+					],
+				];
+			}
+
+			/** Updates the kcal eaten vs. goal text and bar in place, so typing in a meal input keeps focus. */
+			function updateTodayTotals() {
+				const done = state.m[todayKey] || {},
+					goalKcal = planGoalKcal[state.plan],
+					eatenKcal = getTodayRows().reduce(
+						(sum, r) => sum + (done[r[0]] ? r[4] : 0),
+						0,
+					);
+				findElement("#kcal-eaten-vs-goal").textContent =
+					`${eatenKcal} / ${goalKcal} kcal`;
+				findElement("#kcal-vs-maintenance").textContent =
+					`· ${1955 - goalKcal} under maintenance (1,955)`;
+				findElement("#kcal-progress-bar").style.width =
+					`${Math.min(100, (eatenKcal / goalKcal) * 100)}%`;
+			}
+
+			/**
 			 * Today tab: meals, the day's snack plate, walking and workout checklist, kcal progress.
 			 * @returns {Node[]}
 			 */
 			function renderTodayView() {
-				const [pn, pi] = snackPlans[state.plan][weekday],
-					sk = pi.length ? totalKcal(pi) : flexDayKcal[state.plan],
-					rows = [
-						...dailyMeals,
-						[
-							"s",
-							"🍫",
-							"Snack: " + pn,
-							pi.length
-								? describeIngredients(pi)
-								: "Any two packs from the week, up to ~" +
-									flexDayKcal[state.plan] +
-									" kcal",
-							sk,
-						],
-					],
+				const rows = getTodayRows(),
 					d = state.m[todayKey] || {},
-					T = rows.reduce((a, r) => a + r[4], 0),
-					E = rows.reduce((a, r) => a + (d[r[0]] ? r[4] : 0), 0),
 					wk = {
 						1: "Express weights",
 						2: "Workout A",
@@ -647,6 +682,54 @@
 						),
 						kcal != null && createElement("span", { class: "k" }, kcal),
 					);
+				/**
+				 * Checklist row with a number input for the meal's actual kcal,
+				 * and a banner below it with the suggested kcal from `dailyMeals`.
+				 * @param {string} id Meal id; also the key in `state.kcal[todayKey]`.
+				 * @param {string} emoji
+				 * @param {string} title
+				 * @param {string} detail
+				 * @param {number} kcal Current kcal shown in the input.
+				 * @returns {HTMLDivElement}
+				 */
+				const mealRow = (id, emoji, title, detail, kcal) =>
+					createElement(
+						"div",
+						{ class: "row", style: "flex-wrap:wrap" },
+						createElement(
+							"label",
+							{ style: "display:flex;align-items:center;gap:10px;flex:1;min-width:0" },
+							createElement("input", {
+								type: "checkbox",
+								"data-m": id,
+								checked: !!d[id],
+							}),
+							createElement("span", { style: "font-size:22px" }, emoji),
+							createElement(
+								"span",
+								{ class: "grow" },
+								createElement("span", { class: "b" }, title),
+								createElement("br"),
+								createElement("small", {}, detail),
+							),
+						),
+						createElement("input", {
+							type: "number",
+							min: 0,
+							step: 5,
+							inputmode: "decimal",
+							"data-kcal": id,
+							"aria-label": title + " kcal",
+							value: kcal,
+							style: "width:84px",
+						}),
+						createElement("span", { class: "k" }, "kcal"),
+						createElement(
+							"div",
+							{ class: "pill", style: "width:100%;margin-top:0" },
+							`Suggested: ${dailyMeals.find((meal) => meal[0] == id)[4]} kcal`,
+						),
+					);
 				return [
 					createElement("h1", {}, "🌸 Today"),
 					createElement(
@@ -664,31 +747,36 @@
 						createElement(
 							"div",
 							{ class: "chips" },
-							chipButton(!state.plan, { "data-plan": 0 }, "Plan ~1,590"),
-							chipButton(!!state.plan, { "data-plan": 1 }, "Plan ~1,700"),
+							chipButton(
+								!state.plan,
+								{ "data-plan": 0 },
+								`Plan ~${planGoalKcal[0].toLocaleString("en-US")}`,
+							),
+							chipButton(
+								!!state.plan,
+								{ "data-plan": 1 },
+								`Plan ~${planGoalKcal[1].toLocaleString("en-US")}`,
+							),
 						),
 						createElement(
 							"p",
 							{ class: "b", style: "margin:12px 0 6px" },
-							`${E} / ${T} kcal `,
-							createElement(
-								"small",
-								{},
-								`· ${1955 - T} under maintenance (1,955)`,
-							),
+							createElement("span", { id: "kcal-eaten-vs-goal" }),
+							" ",
+							createElement("small", { id: "kcal-vs-maintenance" }),
 						),
 						createElement(
 							"div",
 							{ class: "bar" },
-							createElement("i", {
-								style: `width:${Math.min(100, (E / T) * 100)}%`,
-							}),
+							createElement("i", { id: "kcal-progress-bar" }),
 						),
 					),
 					createElement(
 						"div",
 						{ class: "card" },
-						rows.map((r) => checklistRow(...r)),
+						rows.map((r) =>
+							editableMealIds.has(r[0]) ? mealRow(...r) : checklistRow(...r),
+						),
 					),
 					createElement(
 						"div",
@@ -1228,6 +1316,7 @@
 			/** Re-renders the active tab and the bottom nav. */
 			function renderApp() {
 				findElement("#app").replaceChildren(...tabViews[state.tab]().flat());
+				if (state.tab == "t") updateTodayTotals();
 				if (state.tab == "s") updateMixerTotals();
 				findElement("#nav").replaceChildren(
 					...navTabs.map((n) =>
@@ -1306,8 +1395,18 @@
 					saveState();
 				}
 			});
-			// Mixer amount inputs: update totals in place so the input keeps focus.
+			// Number inputs: update totals in place so the input keeps focus.
 			document.addEventListener("input", (e) => {
+				const meal = e.target.dataset.kcal;
+				if (meal) {
+					(state.kcal[todayKey] = state.kcal[todayKey] || {})[meal] = Math.max(
+						0,
+						parseFloat(e.target.value) || 0,
+					);
+					saveState();
+					updateTodayTotals();
+					return;
+				}
 				const k = e.target.dataset.mx;
 				if (k) {
 					state.mix[k] = Math.max(0, parseFloat(e.target.value) || 0);
